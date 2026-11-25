@@ -1,5 +1,7 @@
 # microboxes
 
+This is a working project. It is not machine-ready. Do not install it on a computer you rely on. The notes describe the system we are aiming at. The flake is a sketch of that system, and it has not been built or installed.
+
 ## Scope
 
 Replicate the **Qubes OS architectural model** on NixOS using [microvm.nix](https://github.com/microvm-nix/microvm.nix).

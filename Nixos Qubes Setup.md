@@ -89,7 +89,7 @@ Left out, because this project already chose another way:
 
 ## Where the tree is
 
-This directory is a sketch. It has not been built or installed. It is not a git repo. The public repo [jdnitrap/flakemicro2](https://github.com/jdnitrap/flakemicro2) is unchanged. Deleting it was skipped.
+This directory is a working project. It is not machine-ready. It has not been built or installed. The public repo [jdnitrap/flakemicro2](https://github.com/jdnitrap/flakemicro2) is unchanged. Deleting it was skipped.
 
 The sketch has a labwc host, greetd autologin, `minimal` on Cloud Hypervisor, `sys-net`, `personal`, and `work`, Salt, and a VM manager. It does not have the bridge, `fw`, SPICE, disposables, per-VM `/home`, or cgroups. The host still has NetworkManager, SSH, and `admin` / `changeme`.
 
