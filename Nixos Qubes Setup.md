@@ -137,6 +137,44 @@ A VM is **base + optional presets + package list**, e.g. `base + graphical + net
 
 ---
 
+## Minimum host
+
+The smallest host that is still this project boots, draws labwc, and starts VMs. It keeps:
+
+- Linux with KVM, systemd-boot, and the firmware that machine needs to show a display.
+- Nix with flakes, so `nixos-rebuild` is the update.
+- One user in `wheel` and `kvm`.
+- greetd, seatd, labwc, and `foot`. That is the whole host session.
+- `microvm.nix`, Cloud Hypervisor, and `virtiofsd`.
+- `iproute2`, for a bridge with no uplink. No NetworkManager and no default route on the host.
+- QEMU only when a VM takes a physical device.
+
+Audio, a browser, editors, and SSH belong in guests. The host terminal is there so you can rebuild when labwc or a VM fails. Salt and the VM manager are admin tools. They are not part of this minimum. The sketch still has NetworkManager, OpenSSH, PipeWire, git, `gh`, vim, htop, wget, curl, and `allowUnfree`. Those are not the minimum host.
+
+---
+
+## Disk
+
+One thin host generation is about **4–6 GB** in the Nix store. Give the disk **20 GB** so a rebuild and one older generation fit. Use **40 GB** if you keep older generations and a few guests.
+
+Measured on a NixOS machine from store closures (they overlap, so they are not added). This is not a built `microboxes` image:
+
+| Piece | Closure |
+|---|---|
+| labwc, including its Wayland stack | 594 MiB |
+| Mesa | 1.0 GiB |
+| foot | 96 MiB |
+| Cloud Hypervisor | 72 MiB |
+| virtiofsd | 49 MiB |
+| kernel image | 22 MiB |
+| QEMU, only if a VM takes a physical device | 2.0 GiB |
+
+systemd, Nix, firmware, and kernel modules are the rest of the 4–6 GB. The kernel image alone is 22 MiB and does not include modules or firmware. Leaving QEMU out keeps the host in that 4–6 GB range.
+
+Guests share `/nix/store`. They do not each get a NixOS copy. Firefox on `personal` adds its own closure, on the order of 1 GB, once. Another VM that uses Firefox adds almost nothing.
+
+---
+
 ## What you must write (not in microvm.nix)
 
 - VM manager GUI (start/stop, labels)

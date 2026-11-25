@@ -66,7 +66,7 @@ Target: a **new NixOS machine**, not an existing desktop.
 
 **Not yet:** microVMs, TAP, browser on host.
 
-**Done when:** Reboot → labwc → terminal. No extra DE. Store is small compared to a workstation.
+**Done when:** Reboot → labwc → terminal. No extra DE. One host generation is about 4–6 GB. See the disk section in [[Nixos Qubes Setup]].
 
 **If stuck:** GPU/Wayland on that hardware. Fix labwc/Mesa before any VM.
 
