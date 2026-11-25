@@ -1,0 +1,392 @@
+================================================================================
+MICROBOXES PROJECT ANALYSIS: SPEC VS. IMPLEMENTATION
+================================================================================
+Date: 2026-11-25
+Reviewed: Flow Plan, Milestones, code (flake.nix, modules/*, scripts/*, salt/)
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+The documentation describes a complete Qubes-like system reaching Milestone 7
+(usable desktop with VM manager + SPICE). The code currently implements
+Milestone 2–3 (VMs boot and run on host NAT). There is a significant gap
+between the spec and implementation.
+
+Current code WILL BUILD and RUN, but it reaches only ~40% of the documented goal.
+
+
+================================================================================
+FLOW PLAN: SPEC vs. IMPLEMENTATION
+================================================================================
+
+Flow Plan Section 1: "What you sit in" (Host architecture)
+  Spec: labwc, panel, mgr, viewer (virt-viewer), virtiofsd, TAP/bridge, CH, QEMU
+  Implemented:
+    ✅ labwc (Wayland, greetd autologin)
+    ❌ panel (skipped)
+    ✅ mgr (Python + Tk GUI manager)
+    ❌ viewer (no SPICE integration)
+    ✅ virtiofsd (via microvm.nix)
+    ❌ TAP/bridge (all VMs use "user" NAT mode, not TAP)
+    ✅ CH (cloud-hypervisor configured)
+    ⚠️ QEMU (declared but no vfio yet)
+  Status: PARTIAL — missing viewer, TAP/bridge, real networking
+
+Flow Plan Section 2: "Guest is a list, not a cloned disk"
+  Spec: base.nix + presets (graphical, networked) + package list
+  Implemented: templates.nix (minimal template) + inline packages in host.nix
+  Status: WORKS but different structure (flatter, not modular)
+
+Flow Plan Section 3: "Traffic (security)"
+  Spec: AppVMs → bridge vmfw → fw microVM → net microVM → physical NIC
+  Implemented: All VMs → host NAT (no bridge, no fw VM, no net VM, no isolation)
+  Status: NOT IMPLEMENTED — security model is missing entirely
+
+Flow Plan Section 4: "How a window appears"
+  Spec Era A: SPICE viewer window on labwc with VM title
+  Implemented: No SPICE integration
+  Status: NOT IMPLEMENTED
+
+Flow Plan Section 5: "Start/stop/update"
+  Spec: Nix defines VMs → nixos-rebuild → guest sees new closure
+  Implemented: ✅ Nix defines VMs, ✅ rebuild updates, ⚠️ no fw/net ordering
+  Status: PARTIAL
+
+Flow Plan Section 7: "Repo layout (target)"
+  Spec: modules/base.nix, modules/presets/, modules/vms/, pkgs/vm-manager/
+  Implemented: modules/host.nix, modules/templates.nix (flatter structure)
+  Status: DIFFERENT but functional
+
+
+================================================================================
+MILESTONES: WHAT'S IMPLEMENTED
+================================================================================
+
+Milestone 0 — Decisions (now)
+  Spec: Architecture locked in docs
+  Status: ✅ COMPLETE — all decisions documented and committed
+
+Milestone 1 — Thin host boots
+  Spec requirements:
+    - labwc session, autologin, mouse, one terminal: ✅ YES
+    - No GNOME/KDE/GDM: ✅ YES (greetd + labwc only)
+    - Optional tiny panel: ⚠️ SKIPPED (not critical)
+    - User with sudo: ✅ YES (admin user in wheel)
+    - SSH optional: ✅ YES (enabled)
+    - KVM enabled: ✅ YES (via microvm.nix)
+    - You can open a terminal: ✅ YES (foot autostart + Super+Return)
+
+  Issues:
+    ⚠️ host.nix has NetworkManager (should be removed per hardening)
+    ⚠️ host.nix has: openssh, PipeWire, git, gh, vim, htop, wget, curl (thicker than minimum)
+    ⚠️ nixpkgs.config.allowUnfree = true (not minimal)
+
+  Status: ✅ MOSTLY COMPLETE (but not minimal host)
+
+Milestone 2 — One throwaway microVM
+  Spec requirements:
+    - microvm.nixosModules.host imported: ✅ YES
+    - One guest (hello/disp-test): ✅ YES (personal VM exists)
+    - virtiofs share of /nix/store: ✅ YES (9p, ro-store)
+    - Guest base.nix (login, root empty password): ✅ YES
+    - cloud-hypervisor: ✅ YES (configured)
+    - systemctl start microvm@guest: ✅ YES (declared)
+    - Log into guest via SSH/serial: ⚠️ Likely works (microvm.nix defaults include SSH)
+    - Reboot host, guest restarts: ✅ SHOULD WORK (systemd unit)
+
+  Status: ✅ COMPLETE
+
+Milestone 3 — Guest networking (host NAT)
+  Spec requirements:
+    - TAP vm-* created by microvm host module: ❌ NO (using user NAT instead)
+    - Host bridge or NAT: ⚠️ Partial (NAT works, but no bridge)
+    - Guest has IP, default route, DNS: ✅ YES (via user NAT)
+    - From guest: ping 1.1.1.1, DNS work: ✅ SHOULD WORK (user NAT provides this)
+    - Document TAP names and IPs: ❌ NO DOCS (and no TAPs defined)
+
+  Notes: Spec says this is "deliberately leaky" (Milestone 3 is intentionally not isolated).
+         Current impl uses QEMU user-mode NAT instead of TAP bridges.
+         This is acceptable for initial testing but different from spec.
+
+  Status: ✅ FUNCTIONALLY COMPLETE (different method: user NAT vs. TAP)
+
+Milestone 4 — Base + app lists
+  Spec requirements:
+    - modules/base.nix: ❌ NO (but templates.minimal acts as base)
+    - modules/presets/graphical.nix: ❌ NO
+    - modules/presets/networked.nix: ❌ NO
+    - Two guests with different packages: ✅ YES (personal + work)
+    - Same base: ✅ YES (both import templates.minimal)
+    - Rebuild → guest closure changes: ✅ YES
+
+  Status: ✅ FUNCTIONALLY COMPLETE (different structure)
+
+Milestone 5 — Persistent `work` + disposable `disp`
+  Spec requirements:
+    - work: extra disk or virtiofs for /home that survives reboot: ❌ NO
+    - disp: overlay only; kill VM → data gone: ❌ NO
+    - Start disp, create file, stop, start again → file missing: ❌ NOT TESTABLE
+    - Start work, create file, reboot → file present: ❌ NOT TESTABLE
+
+  Status: ❌ NOT IMPLEMENTED
+
+Milestone 6 — `fw` + `net`; host drops uplink
+  Spec requirements:
+    - Bridge vmfw with no default route on host: ❌ NO
+    - fw VM with nftables: ❌ NO
+    - net VM owns physical NIC: ❌ NO
+    - AppVMs attached to vmfw: ❌ NO
+    - Host cannot browse internet: ❌ NO (host has NetworkManager)
+    - vault definition with zero TAP: ❌ NO
+
+  Status: ❌ NOT IMPLEMENTED — This is the first security milestone
+
+Milestone 7 — Manager GUI + SPICE on labwc
+  Spec requirements:
+    - VM manager on labwc (list, start, stop): ✅ YES (Python GUI exists)
+    - Starting work opens virt-viewer/SPICE as labwc window: ❌ NO
+    - Mouse works in that window: ❌ N/A (no SPICE)
+    - Window title shows VM name: ❌ N/A
+    - Optional labwc rule for colored border: ❌ NO
+
+  Status: ⚠️ PARTIAL (GUI exists, but no SPICE integration)
+
+Milestones 8–12
+  Status: ❌ NOT ADDRESSED
+
+
+================================================================================
+CODE STRUCTURE ANALYSIS
+================================================================================
+
+flake.nix:
+  ✅ Inputs: nixpkgs (nixos-26.05), microvm
+  ✅ Outputs: nixosConfigurations.nixqubes, packages.personal
+  ⚠️ Redundant: personal defined both in nixosConfigurations AND in host.nix microvm.vms
+  ❌ hardware-configuration.nix is commented out (needs uncommenting)
+  ❌ Missing: fw, net, disp, vault configurations
+  Issue: deploy.md says "nixos-rebuild switch --flake .#host" but should be ".#nixqubes"
+
+modules/host.nix:
+  ✅ Boot: systemd-boot + EFI
+  ✅ Users: admin/changeme, wheel, kvm
+  ✅ Desktop: labwc, greetd, foot terminal
+  ✅ KVM: enabled implicitly via microvm.vms
+  ✅ Packages: includes qemu, iproute2, bridge-utils, python3, tk
+  ⚠️ NetworkManager: enabled (should be removed per Milestone 6)
+  ⚠️ SSH: enabled (optional per spec)
+  ⚠️ PipeWire: enabled (not minimum host)
+  ✅ microvm.vms: sys-net, personal, work defined
+  ❌ No fw VM (firewall)
+  ❌ No net VM (network isolation)
+  ❌ No vault VM (offline)
+  ❌ No disp VM (disposable)
+  ❌ No TAP bridges configured
+  ❌ No persistent /home disks
+  ❌ No SPICE/virt-viewer integration
+
+modules/templates.nix:
+  ✅ minimal template defined
+  ✅ cloud-hypervisor configured
+  ✅ virtiofs 9p share of /nix/store (read-only)
+  ✅ writable overlay
+  ✅ 512MB RAM, 1 vCPU
+  ❌ No base.nix (but templates.minimal acts as base)
+  ❌ No graphical preset
+  ❌ No networked preset
+
+scripts/gui-launcher.py:
+  ✅ Lists VMs (sys-net, personal, work, custom)
+  ✅ Start/stop buttons
+  ✅ Color-coded rows
+  ✅ Create VM button (writes stubs to ~/.microboxes/)
+  ✅ Disposable launcher
+  ✅ Refresh button
+  ⚠️ Tries to launch disposable via "nix run .#personal" (may need testing)
+  ❌ No SPICE window launching
+  ❌ No integration with VM colors/labels
+
+scripts/launch-vm.sh:
+  ✅ Simple wrapper to start VM via systemctl or microvm CLI
+  ⚠️ Likely not used by the manager
+
+salt/top.sls:
+  ✅ Routes by hostname
+
+salt/host.sls:
+  ✅ Starts sys-net, personal, work in dependency order
+  ⚠️ No fw/net precedence (should start fw/net first per Milestone 6)
+  ❌ No validation checks (host shouldn't have default route, vault shouldn't have TAP)
+
+docs/deploy.md:
+  ❌ BUG: says "nixos-rebuild switch --flake .#host" (should be .#nixqubes)
+  ✅ Otherwise clear steps
+
+docs/networking.md:
+  ✅ Explains TAP/bridge setup
+  ✅ Lists steps to migrate from user NAT to real isolation
+  ✅ References microvm.nix docs
+
+docs/harden.md:
+  ✅ Lists hardening recommendations
+  ✅ Acknowledges kernel + KVM stay in TCB
+
+
+================================================================================
+WHAT WILL WORK IF YOU BUILD NOW
+================================================================================
+
+✅ Host will boot to labwc with autologin as admin
+✅ foot terminal opens on startup and via Super+Return
+✅ nixqubes-manager GUI will launch
+✅ Manager shows sys-net, personal, work VMs
+✅ Click Start → systemctl starts microvm@<name>
+✅ Cloud-hypervisor boots the guest
+✅ Guests have internet via host NAT (QEMU user-mode)
+✅ You can SSH into guests
+✅ Click Stop → VM shuts down
+✅ Create VM button writes stubs to ~/.microboxes/
+✅ Disposable launcher attempts to run a temporary session
+✅ Reboot: everything persists and restarts
+
+
+================================================================================
+WHAT WON'T WORK / IS MISSING
+================================================================================
+
+Security / Isolation:
+  ❌ No fw VM (firewall rules)
+  ❌ No net VM (dedicated networking)
+  ❌ No vault VM (offline storage)
+  ❌ No TAP bridges (no vmfw bridge)
+  ❌ No inter-VM network isolation (all VMs share host NAT)
+  ❌ No nftables policy between VMs
+  ❌ Host has default route (not isolated from VMs)
+
+Storage / Persistence:
+  ❌ No persistent /home disks for VMs
+  ❌ No disposable VM support (overlay-only)
+  ❌ Created VMs don't persist in flake (stubs in ~/.microboxes/ need manual copy)
+
+GUI / Desktop:
+  ❌ No SPICE/virt-viewer integration (can't see VMs as windows on labwc)
+  ❌ No colored borders on VM windows (no labwc rules)
+  ❌ No virtio-Wayland (seamless apps)
+  ❌ No panel (optional but mentioned in Flow Plan)
+
+Host Minimization:
+  ⚠️ NetworkManager should be removed
+  ⚠️ Extra packages (SSH, PipeWire, git, gh, vim, htop, wget, curl) not minimum
+  ⚠️ allowUnfree not needed for this setup
+
+Code Structure:
+  ⚠️ Redundant personal in flake.nix nixosConfigurations
+  ⚠️ No separate base.nix / presets / vms/ modules (flatter than spec)
+  ⚠️ Repo layout differs from Flow Plan Section 7 (but functionally OK)
+
+Bugs / Issues:
+  ❌ deploy.md typo: says .#host, should be .#nixqubes
+  ❌ hardware-configuration.nix commented out in flake.nix
+  ❌ GUI tries to "nix run .#personal" for disposables (may not work)
+
+
+================================================================================
+MILESTONE READINESS
+================================================================================
+
+Milestone Reached: 2–3
+Milestone Targetable: 4 (with current code)
+Milestone Promised (docs): 7
+
+To reach Milestone 4 (app lists per VM):
+  ✅ Already done in code
+
+To reach Milestone 5 (persistent + disposable):
+  ❌ Need: /home disk definitions in microvm.vms
+  ❌ Need: disp VM with overlay-only config
+
+To reach Milestone 6 (fw + net, isolation):
+  ❌ Need: fw microVM (nftables, forwarding)
+  ❌ Need: net microVM (owns physical NIC)
+  ❌ Need: bridge vmfw (host bridge with no default route)
+  ❌ Need: TAP interfaces for each VM
+  ❌ Need: Host networking redesign (remove NetworkManager, use iproute2)
+  ❌ Need: Salt states for fw/net startup ordering
+  ❌ Need: vault microVM definition
+
+To reach Milestone 7 (Manager GUI + SPICE):
+  ✅ GUI exists (manager)
+  ❌ Need: virt-viewer / SPICE integration
+  ❌ Need: labwc window rules for colored borders
+  ❌ Need: Manager to launch SPICE windows
+
+
+================================================================================
+BUILD READINESS
+================================================================================
+
+Can you build this? YES.
+Will it work? YES (Milestone 2–3 level).
+Is it production-ready? NO (lacks isolation, SPICE, security model).
+Is it a good foundation? YES.
+
+To build:
+  1. Supply hardware-configuration.nix (generated on target machine)
+  2. Uncomment line in flake.nix
+  3. Fix deploy.md typo if following docs
+  4. Run: sudo nixos-rebuild switch --flake .#nixqubes
+  5. Wait ~20 min (first build) for host
+  6. Reboot
+  7. Log in as admin/changeme
+  8. Manager GUI should appear on labwc (or launch: python3 scripts/gui-launcher.py)
+  9. Click Start on personal VM → watch it boot
+
+
+================================================================================
+RECOMMENDED NEXT STEPS (FOR YOU)
+================================================================================
+
+Option A: Build and test Milestone 2–3 as foundation
+  Pros: See it run, have working VMs
+  Cons: Not the full system described in docs
+  Time: 1–2 hours
+
+Option B: Add missing pieces first (fw, net, disp, vault), then build
+  Pros: Builds toward full Milestone 7
+  Cons: More work before seeing anything run
+  Time: 4–8 hours
+
+Option C: Build as-is, then incrementally add Milestones 5–7
+  Pros: See intermediate progress, debug in stages
+  Cons: Multiple rebuilds
+  Time: 2–3 hours + iteration
+
+Recommendation: Option C (build now, layer in features).
+Reason: You can test VMs boot, manager works, then add isolation/SPICE.
+
+
+================================================================================
+OPEN QUESTIONS FOR YOU
+================================================================================
+
+1. What is your primary goal?
+   a) Learn how microvm.nix + NixOS work
+   b) Build a working Qubes-like isolation system
+   c) Test/benchmark all features
+
+2. Do you want to build Milestone 2–3 first, or wait for a complete Milestone 7?
+
+3. Should I:
+   a) Fix the bugs and build as-is?
+   b) Add the missing Milestone 5–6 pieces first?
+   c) Create a plan to reach Milestone 7?
+
+4. For the host networking, do you have a preference?
+   a) Keep user NAT (simplest, no isolation)
+   b) Switch to TAP bridges (more realistic, matches docs)
+   c) Full vfio + real NIC passthrough (Milestone 11)
+
+================================================================================
+END OF ANALYSIS
+================================================================================
