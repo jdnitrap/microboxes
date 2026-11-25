@@ -1,21 +1,48 @@
-MIT License
+Non-Commercial Share-Back License
 
 Copyright (c) 2026 jdnitrap
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software and the documentation that ships with it (the "Software")
+are licensed on the terms below. This is not an MIT license. Commercial
+use is not allowed.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Grant
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+You may use, copy, modify, and distribute the Software, and you may
+permit others to do so, only for non-commercial purposes.
+
+A purpose is commercial if it is primarily intended for commercial
+advantage or monetary compensation. That includes selling the Software,
+selling a product or service that contains the Software, and using the
+Software inside a business. Teaching, personal use, and unpaid research
+are non-commercial.
+
+2. Share changes back
+
+If you distribute a modified version of the Software, you must, before
+or at the time of that distribution:
+
+- license the whole modified version under these same terms, and
+- offer the complete corresponding source of that modified version back
+  to the upstream project at https://github.com/jdnitrap/microboxes,
+  by a pull request or by another public written offer to the copyright
+  holder.
+
+You must keep this copyright notice and these terms with every copy or
+substantial portion of the Software.
+
+3. No commercial use
+
+You may not use, copy, modify, or distribute the Software for a
+commercial purpose. No fee, royalty, or other charge is due for a
+non-commercial use under section 1.
+
+4. No warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
