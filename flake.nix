@@ -27,7 +27,7 @@
           inherit system;
           modules = [
             microvm.nixosModules.host
-            # Add ./hardware-configuration.nix after nixos-generate-config on the target machine.
+            ./hardware-configuration.nix
             (import ./modules/host.nix { inherit pkgs templates; })
           ];
         };
