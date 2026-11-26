@@ -1,6 +1,6 @@
 # Day-to-day deploy
 
-Host name is set to `nixqubes`.
+Host name is set to `microboxes`.
 
 1. Clone the repo on the NixOS host.
 2. Place your machine's `hardware-configuration.nix` in the repo root (it will be imported when you uncomment the line in flake.nix).
@@ -8,7 +8,7 @@ Host name is set to `nixqubes`.
 4. (Optional) Follow `docs/networking.md` for real isolation.
 5. Build and switch:
    ```bash
-   sudo nixos-rebuild switch --flake .#nixqubes
+   sudo nixos-rebuild switch --flake .#microboxes
    ```
 6. Log in as `admin` / `changeme` (change the password).
 7. Launch the manager:

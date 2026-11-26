@@ -23,7 +23,7 @@
       templates = templatesMod.templates;
     in {
       nixosConfigurations = {
-        nixqubes = nixpkgs.lib.nixosSystem {
+        microboxes = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
             microvm.nixosModules.host

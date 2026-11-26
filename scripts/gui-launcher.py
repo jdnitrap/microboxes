@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-nixqubes VM Manager — Qubes-style list
+microboxes VM Manager — Qubes-style list
 Always shows declared VMs even if systemctl units are not yet installed.
 """
 import subprocess
@@ -88,11 +88,11 @@ def create_vm():
     messagebox.showinfo("Created", f"Stub saved to:\n{stub}\n\nAdd the block to modules/host.nix and rebuild.")
 
 root = tk.Tk()
-root.title("nixqubes — VM Manager")
+root.title("microboxes — VM Manager")
 root.geometry("720x480")
 root.configure(bg="#1e1e1e")
 
-tk.Label(root, text="nixqubes", font=("Sans", 16, "bold"), bg="#1e1e1e", fg="white").pack(pady=6)
+tk.Label(root, text="microboxes", font=("Sans", 16, "bold"), bg="#1e1e1e", fg="white").pack(pady=6)
 
 style = ttk.Style()
 style.theme_use("clam")

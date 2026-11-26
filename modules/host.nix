@@ -1,20 +1,20 @@
 { pkgs, templates, ... }:
 let
-  nixqubes-manager = pkgs.stdenv.mkDerivation {
-    name = "nixqubes-manager";
+  microboxes-manager = pkgs.stdenv.mkDerivation {
+    name = "microboxes-manager";
     src = ../scripts;
     nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
       mkdir -p $out/bin $out/share/applications
-      cp gui-launcher.py $out/bin/nixqubes-manager
-      chmod +x $out/bin/nixqubes-manager
+      cp gui-launcher.py $out/bin/microboxes-manager
+      chmod +x $out/bin/microboxes-manager
       # Ensure shebang works
-      sed -i '1s|.*|#!${pkgs.python3}/bin/python3|' $out/bin/nixqubes-manager
-      cat > $out/share/applications/nixqubes-manager.desktop << EOF
+      sed -i '1s|.*|#!${pkgs.python3}/bin/python3|' $out/bin/microboxes-manager
+      cat > $out/share/applications/microboxes-manager.desktop << EOF
       [Desktop Entry]
-      Name=nixqubes VM Manager
+      Name=microboxes VM Manager
       Comment=Start, stop, and create microVMs
-      Exec=nixqubes-manager
+      Exec=microboxes-manager
       Icon=utilities-system-monitor
       Terminal=false
       Type=Application
@@ -29,7 +29,7 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking (minimal: no default route on host)
-  networking.hostName = "nixqubes";
+  networking.hostName = "microboxes";
   # Network config is manual via iproute2; see docs/networking.md
   networking.networkmanager.enable = false;
   networking.useNetworkd = true;
@@ -87,7 +87,7 @@ in
     # GUI manager (includes .desktop file)
     python3
     tk
-    nixqubes-manager
+    microboxes-manager
 
     # MicroVM / hypervisor support
     qemu

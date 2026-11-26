@@ -23,7 +23,7 @@ This means the same shape and workflow:
 The security model is the Qubes shape on KVM: thin host, one template (`minimal`), AppVMs, `net` and `fw`, disposables. The files in this directory are a sketch of that model. They are not the model yet. See `Nixos Qubes Setup.md`.
 
 ## What you get
-- labwc host named `nixqubes` with admin user (`admin` / `changeme`, mutable users). greetd autologin, no XFCE.
+- labwc host named `microboxes` with admin user (`admin` / `changeme`, mutable users). greetd autologin, no XFCE.
 - One guest template: `minimal` (Cloud Hypervisor, shared `/nix/store`)
 - Purpose VMs: `sys-net`, `personal`, `work`, each a package list on `minimal`
 - GUI manager for start/stop/status, temporary sessions, and labeled VM creation
@@ -41,7 +41,7 @@ The security model is the Qubes shape on KVM: thin host, one template (`minimal`
 ## Deploy
 
 ```bash
-sudo nixos-rebuild switch --flake .#nixqubes
+sudo nixos-rebuild switch --flake .#microboxes
 ```
 
 After switch, log in as `admin` / `changeme` and run the manager.
