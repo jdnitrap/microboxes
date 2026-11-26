@@ -28,11 +28,32 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Networking (minimal: no default route on host)
+  # Networking (minimal: systemd-networkd, no NetworkManager)
   networking.hostName = "microboxes";
-  # Network config is manual via iproute2; see docs/networking.md
   networking.networkmanager.enable = false;
   networking.useNetworkd = true;
+
+  # Let systemd-networkd manage the main interface with DHCP
+  # This allows downloading packages from nixos cache during rebuilds
+  # TODO: After Milestone 1, replace with static routes and remove default route
+  # (per Milestone 6 security model: host should not have internet access)
+  systemd.network = {
+    enable = true;
+    networks."10-eth" = {
+      matchConfig.Type = "ether";
+      DHCP = "yes";
+      dhcpConfig = {
+        UseDNS = true;
+        UseNTP = true;
+      };
+    };
+  };
+
+  # Ensure systemd-resolved provides DNS
+  services.resolved = {
+    enable = true;
+    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
+  };
 
   # Locale / time
   time.timeZone = "America/New_York";

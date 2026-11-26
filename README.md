@@ -4,7 +4,7 @@ This is a working project. It is not machine-ready. Do not install it on a compu
 
 Copying and modification are allowed for non-commercial use under the [license](LICENSE). If you distribute a modified version, you must license it on these same terms and offer the changes back to this repository. Commercial use is not allowed.
 
-The minimum host is labwc, Nix, Cloud Hypervisor, and `virtiofsd`. One generation of that host is about 4–6 GB. Plan on a 20 GB disk, or 40 GB if you keep old generations and a few guests. Details are in `Nixos Qubes Setup.md`.
+The minimum host is labwc, Nix, KVM, and `virtiofsd`. One generation of that host is about 4–6 GB. Plan on a 20 GB disk, or 40 GB if you keep old generations and a few guests. Networking uses systemd-networkd (DHCP) for minimal setup. Details are in `Nixos Qubes Setup.md`.
 
 ## Scope
 
