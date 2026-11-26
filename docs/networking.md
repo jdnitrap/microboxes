@@ -12,7 +12,7 @@ Only the `sys-net` microVM sees the physical NIC. Other VMs talk to sys-net via 
    sudo ip link set br0 up
    ```
 2. Move the physical interface into the bridge (or use NetworkManager).
-3. In `flake.nix`, change sys-net's interface to:
+3. In `configuration.nix`, update the sys-net VM interface to:
    ```nix
    microvm.interfaces = [{
      type = "tap";
