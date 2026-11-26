@@ -28,9 +28,11 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Networking
+  # Networking (minimal: no default route on host)
   networking.hostName = "nixqubes";
-  networking.networkmanager.enable = true;
+  # Network config is manual via iproute2; see docs/networking.md
+  networking.networkmanager.enable = false;
+  networking.useNetworkd = true;
 
   # Locale / time
   time.timeZone = "America/New_York";
@@ -40,11 +42,8 @@ in
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
-    "ca-derivations"
-    "recursive-nix"
-    "impure-derivations"
   ];
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = false;
 
   # Users
   users.mutableUsers = true;
@@ -76,20 +75,13 @@ in
       </keyboard>
     </labwc_config>
   '';
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-  };
-
-  # SSH
+  # SSH (optional, for remote management)
   services.openssh.enable = true;
 
   environment.systemPackages = with pkgs; [
     # Core management
     salt
     git
-    gh
     vim
 
     # GUI manager (includes .desktop file)
@@ -105,10 +97,7 @@ in
     # Host terminal on labwc. Super+Return opens another.
     foot
 
-    # General support
-    openssh
-    htop
-    wget
+    # Minimal utilities
     curl
   ];
 

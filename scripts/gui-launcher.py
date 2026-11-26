@@ -64,8 +64,8 @@ def launch_disposable():
     label = simpledialog.askstring("Disposable VM", "Session label:", initialvalue="disp")
     if not label:
         return
-    messagebox.showinfo("Disposable", f"Starting disposable '{label}'\n(close the VM window to discard)")
-    subprocess.Popen(["nix", "run", f"{FLAKE}#personal"])
+    messagebox.showinfo("Disposable", f"Disposable VMs require defining a 'disp' VM in the flake.\nFor now, use Create VM to add one with overlay-only storage.\n(close the VM window to discard)")
+    # TODO: implement disposable VM launch after disp VM is defined in flake
 
 def create_vm():
     name = simpledialog.askstring("Create VM", "Name:")

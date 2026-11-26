@@ -8,7 +8,7 @@ Host name is set to `nixqubes`.
 4. (Optional) Follow `docs/networking.md` for real isolation.
 5. Build and switch:
    ```bash
-   sudo nixos-rebuild switch --flake .#host
+   sudo nixos-rebuild switch --flake .#nixqubes
    ```
 6. Log in as `admin` / `changeme` (change the password).
 7. Launch the manager:

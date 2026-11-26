@@ -31,19 +31,6 @@
             (import ./modules/host.nix { inherit pkgs templates; })
           ];
         };
-
-        personal = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            templates.minimal
-            { networking.hostName = "personal"; }
-          ];
-        };
-      };
-
-      packages.${system} = {
-        default = self.nixosConfigurations.personal.config.microvm.declaredRunner;
-        personal = self.nixosConfigurations.personal.config.microvm.declaredRunner;
       };
     };
 }
