@@ -5,7 +5,7 @@ let
     users.users.root.password = "";
     system.stateVersion = "26.05";
     microvm = {
-      hypervisor = "cloud-hypervisor";
+      hypervisor = "qemu";
       mem = 512;
       vcpu = 1;
       shares = [{
