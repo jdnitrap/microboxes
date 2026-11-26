@@ -52,7 +52,7 @@ in
   # Ensure systemd-resolved provides DNS
   services.resolved = {
     enable = true;
-    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
+    settings.Resolve.FallbackDNS = [ "1.1.1.1" "8.8.8.8" ];
   };
 
   # Locale / time
