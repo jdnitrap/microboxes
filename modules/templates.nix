@@ -9,7 +9,7 @@ let
       mem = 512;
       vcpu = 1;
       shares = [{
-        proto = "9p";
+        proto = "virtiofs";
         tag = "ro-store";
         source = "/nix/store";
         mountPoint = "/nix/.ro-store";
