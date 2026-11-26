@@ -31,25 +31,30 @@ The security model is the Qubes shape on KVM: thin host, one template (`minimal`
 - Deploy and networking guides
 
 ## Structure
-- `flake.nix` — thin entry point
-- `modules/host.nix` — host configuration
-- `modules/templates.nix` — `minimal` guest
+- `configuration.nix` — main NixOS config (no flakes required)
+- `modules/host.nix` — host setup (included by configuration.nix)
+- `modules/templates.nix` — `minimal` guest template
 - `scripts/gui-launcher.py` — day-to-day manager
 - `docs/deploy.md`, `docs/networking.md`, `docs/harden.md`
-- `hardware-configuration.nix` is not in the tree. Generate it on the target machine and add it to `flake.nix`.
+- `hardware-configuration.nix` — generate on target machine (not in repo)
 
 ## Deploy
 
+**Traditional NixOS (no flakes required):**
+
 ```bash
-sudo nixos-rebuild switch --flake .#microboxes
+sudo nixos-rebuild switch -I nixos-config=/path/to/microboxes/configuration.nix
 ```
 
-After switch, log in as `admin` / `changeme` and run the manager.
+After rebuild, log in as `admin` / `changeme` and run:
+```bash
+microboxes-manager
+```
 
 ## Daily use
-- GUI: start/stop purpose VMs, launch temporary sessions, create labeled VMs.
-- Labeled VM stubs land in `~/.microboxes/` — paste into the flake and rebuild.
-- Networking isolation steps: `docs/networking.md`.
-- TCB minimization / hardening: `docs/harden.md`.
+- GUI: start/stop purpose VMs, launch temporary sessions, create labeled VMs
+- Labeled VM stubs land in `~/.microboxes/` — add to configuration.nix and rebuild
+- Networking isolation: see `docs/networking.md`
+- TCB minimization: see `docs/harden.md`
 
 Handbook: https://microvm-nix.github.io/microvm.nix/
