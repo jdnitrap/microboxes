@@ -4,16 +4,27 @@
 { config, pkgs, lib, ... }:
 
 let
-  # Manager GUI package
+  # Import hardware configuration from the same directory
+  hardwareConfig = ./hardware-configuration.nix;
+in
+
+let
+  # Manager GUI package with Python + tkinter
+  python-with-tk = pkgs.python3.withPackages (p: with p; [ tkinter ]);
+
   microboxes-manager = pkgs.stdenv.mkDerivation {
     name = "microboxes-manager";
     src = ./scripts;
     nativeBuildInputs = [ pkgs.makeWrapper ];
     installPhase = ''
       mkdir -p $out/bin $out/share/applications
-      cp gui-launcher.py $out/bin/microboxes-manager
-      chmod +x $out/bin/microboxes-manager
-      sed -i '1s|.*|#!${pkgs.python3}/bin/python3|' $out/bin/microboxes-manager
+      cp gui-launcher.py $out/bin/microboxes-manager-unwrapped
+      chmod +x $out/bin/microboxes-manager-unwrapped
+
+      # Wrap with Python + tkinter
+      makeWrapper ${python-with-tk}/bin/python3 $out/bin/microboxes-manager \
+        --add-flags $out/bin/microboxes-manager-unwrapped
+
       cat > $out/share/applications/microboxes-manager.desktop << EOF
       [Desktop Entry]
       Name=microboxes VM Manager
@@ -28,9 +39,11 @@ let
   };
 in
 {
-  # Import microvm.nix if available (via channels or git submodule)
-  # If not available, comment this out and ensure microvm is in nixpkgs
-  # imports = [ ./microvm-nix/nixosModules/host ];
+  imports = [
+    hardwareConfig
+    # Import microvm.nix if available (via channels or git submodule)
+    # ./microvm-nix/nixosModules/host
+  ];
 
   # Boot
   boot.loader.systemd-boot.enable = true;
